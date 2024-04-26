@@ -1,0 +1,110 @@
+qlques remarques:
+- pour tester l'application sur docker compose, il faut attendre jusqu'a le serveur Eureka demare et detectent les autres services
+- dans un env docker, il faut tjrs remplacer le nom de la machine par le nom de conteneur( ds un cluster k8s, à savoir keske qu'on va mettre)
+
+
+##########################################################################
+# step 0 : Dev URLS (utilisé seulement si et seulement si provider-service ou article-service ont été lancé en mode dev)
+##########################################################################
+#################### provider-service 
+http://localhost:8080/provider/
+http://localhost:8080/provider/hello
+http://localhost:8080/provider/greeting
+http://localhost:8080/provider/displayMessage
+#################### article-service 
+http://localhost:8080/article/
+http://localhost:8080/article/hello
+http://localhost:8080/article/greeting
+http://localhost:8080/article/displayMessage
+##########################################################################
+##########################################################################
+# step 0 : Docker URLS
+##########################################################################
+//---------------------------------------------------------
+eureka-service     --->    http://localhost:8761/
+
+//---------------------------------------------------------
+provider-service   --->    http://localhost:8001/
+
+EndPoints:
+http://localhost:8001/provider/
+http://localhost:8001/provider/hello
+http://localhost:8001/provider/greeting
+http://localhost:8001/provider/displayMessage
+
+//---------------------------------------------------------
+article-service   --->    http://localhost:8003/
+
+EndPoints: 
+http://localhost:8003/article/
+http://localhost:8003/article/hello
+http://localhost:8003/article/greeting
+http://localhost:8003/article/displayMessage
+//----------------------------------------------------------
+- ici, je n'ai pas réussi à implementer le dynamique mapping avec load balancer????
+gateway-service    --->    http://localhost:9191/ 
+
+EndPoints: 
+http://localhost:9191/ 
+//---------------
+En principe, il faut que ces adresses marchent bien selon ce qui j'ai trouvé ds les docs(sauf qu'ils ne sont, peut etre que je n'ai pas b1 compris les docs):
+http://localhost:9191/provider/ 
+http://localhost:9191/provider/hello
+http://localhost:9191/provider/greeting
+http://localhost:9191/provider/displayMessage
+//---------------
+http://localhost:9191/article/
+http://localhost:9191/article/hello
+http://localhost:9191/article/greeting
+http://localhost:9191/article/displayMessage
+
+Au contraire, seulement le defaut comportement de cloud gateway fonctione(comme si on a configuré notre app pour rien). En tous cas voici la liste des adresses qui fonctionnent
+EndPoints: 
+http://localhost:9191/ 
+//---------------
+http://localhost:9191/provider-service/provider/ 
+http://localhost:9191/provider-service/provider/hello
+http://localhost:9191/provider-service/provider/greeting
+http://localhost:9191/provider-service/provider/displayMessage
+//---------------
+http://localhost:9191/article-service/article/
+http://localhost:9191/article-service/article/hello
+http://localhost:9191/article-service/article/greeting
+http://localhost:9191/article-service/article/displayMessage
+//----------------------------------------------------------
+
+##########################################################################
+# Step 1: build and push images to dockerhub
+##########################################################################
+
+ docker init 
+ docker build -t micromicroams-eureka-service .
+ docker tag micromicroams-eureka-service ziedab/microams-eureka-service 
+ docker push ziedab/microams-eureka-service
+ <------------------------------------------------->
+ docker init 
+ docker build -t microams-article-service .
+ docker tag microams-article-service ziedab/microams-article-service
+ docker push ziedab/microams-article-service
+ 
+ docker init 
+ docker build -t microams-provider-service .
+ docker tag microams-provider-service ziedab/microams-provider-service
+ docker push ziedab/microams-provider-service
+ <------------------------------------------------->
+ docker init
+ docker build -t microams-gateway-service .
+ docker tag microams-gateway-service ziedab/microams-gateway-service 
+ docker push ziedab/microams-gateway-service 
+ 
+ 
+##########################################################################
+# step 3 : docker-compose
+##########################################################################
+
+docker compose up -d --build
+docker compose down -v
+
+##########################################################################
+#
+########################################################################## 

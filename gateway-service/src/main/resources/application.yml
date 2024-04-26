@@ -1,0 +1,37 @@
+# Spring Cloud Gateway configuration
+spring:
+  application:
+    name: gateway-service
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true # Ensures consistent service name handling   
+      routes:
+        - id : service provider with any id name # Descriptive ID for better clarity
+          #uri : lb://PROVIDER-SERVICE # Use service discovery for dynamic routing
+          #uri: http://localhost:8001 # Can be used for initial testing on dev mode 
+          uri: http://provider-service-cont:8001 # Can be used for initial testing on dev mode 
+          predicates :
+            - Path=/provider/** # Matches paths starting with /provider/
+        - id : service article with any id name  # Descriptive ID for better clarity
+          #uri : lb://ARTICLE-SERVICE # Use service discovery for dynamic routing
+          #uri: http://localhost:8003 # Can be used for initial testing on dev mode 
+          uri: http://article-service-cont:8003 # Can be used for initial testing on dev mode 
+          predicates :
+            - Path=/article/** # Matches paths starting with /article/          
+
+server:
+  port: 9191
+
+# Eureka Discovery Client configuration
+eureka:
+  client:
+    registerWithEureka: true
+    fetch-registry: true
+    serviceUrl:
+      defaultZone: http://eureka-service-cont:8761/eureka/
+      #defaultZone: http://localhost:8761/eureka/  # only when running the app on dev mode on your localhost
+ 

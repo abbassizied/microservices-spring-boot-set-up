@@ -1,0 +1,47 @@
+services:
+
+  # Eureka service
+  eureka:
+    image: ziedab/microams-eureka-service
+    ports:
+      - "8761:8761" 
+    container_name: eureka-service-cont
+    restart: always 
+
+  #################################################
+  
+  # Provider service
+  provider:
+    image: ziedab/microams-provider-service
+    ports:
+      - "8001:8080" 
+    container_name: provider-service-cont
+    depends_on:  
+      - eureka
+    restart: always
+
+
+  # Article service
+  article:
+    image: ziedab/microams-article-service
+    ports:
+      - "8003:8080" 
+    container_name: article-service-cont
+    depends_on:  
+      - eureka
+    restart: always
+ 
+  ################################################# 
+  
+  # Gateway service
+  gateway:
+    image: ziedab/microams-gateway-service
+    ports:
+      - "9191:9191" 
+    container_name: gateway-service-cont
+    depends_on:  
+      - eureka
+      - article
+      - provider
+    restart: always 
+
